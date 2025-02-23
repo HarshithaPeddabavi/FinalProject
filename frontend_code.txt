@@ -1,0 +1,141 @@
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import Home from "./pages/Home";
+import ReportItem from "./pages/ReportItem";
+import SearchItems from "./pages/SearchItems";
+import Navbar from "./components/Navbar";
+import "./App.css";
+
+function App() {
+  return (
+    <Router>
+      <Navbar />
+      <div className="container p-4">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/report" element={<ReportItem />} />
+          <Route path="/search" element={<SearchItems />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+
+// Implementing Login Page
+export function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const response = await fetch("http://localhost:5000/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    if (response.ok) navigate("/");
+    else alert("Login failed");
+  };
+
+  return (
+    <div>
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
+        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+}
+
+// Implementing Signup Page
+export function Signup() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    const response = await fetch("http://localhost:5000/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password }),
+    });
+    if (response.ok) navigate("/login");
+    else alert("Signup failed");
+  };
+
+  return (
+    <div>
+      <h2>Signup</h2>
+      <form onSubmit={handleSignup}>
+        <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <button type="submit">Signup</button>
+      </form>
+    </div>
+  );
+}
+
+// Implementing Report Item Page
+export function ReportItem() {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+
+  const handleReport = async (e) => {
+    e.preventDefault();
+    const response = await fetch("http://localhost:5000/api/report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description, location }),
+    });
+    if (response.ok) alert("Item reported successfully");
+    else alert("Failed to report item");
+  };
+
+  return (
+    <div>
+      <h2>Report Lost Item</h2>
+      <form onSubmit={handleReport}>
+        <input type="text" placeholder="Item Name" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} required />
+        <input type="text" placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} required />
+        <button type="submit">Report Item</button>
+      </form>
+    </div>
+  );
+}
+
+// Implementing Search Items Page
+export function SearchItems() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [items, setItems] = useState([]);
+
+  const handleSearch = async () => {
+    const response = await fetch(`http://localhost:5000/api/search?query=${searchTerm}`);
+    const data = await response.json();
+    setItems(data);
+  };
+
+  return (
+    <div>
+      <h2>Search Lost Items</h2>
+      <input type="text" placeholder="Search by name or location" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+      <button onClick={handleSearch}>Search</button>
+      <ul>
+        {items.map((item) => (
+          <li key={item._id}>{item.name} - {item.location}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
